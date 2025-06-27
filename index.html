@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StyleBloom - Your Style Universe</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-color: #FFF8F8;
+            --sidebar-bg: #FADADD;
+            --primary-accent: #E75480;
+            --text-color: #4A4A4A;
+            --body-font: 'Poppins', sans-serif;
+            --arabic-font: 'Cairo', sans-serif;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+        body { font-family: var(--body-font); background-color: var(--bg-color); color: var(--text-color); display: flex; }
+        h1, h2, h3 { font-weight: 600; }
+
+        /* Sidebar */
+        .sidebar { width: 260px; height: 100vh; background-color: var(--sidebar-bg); position: fixed; top: 0; left: 0; display: flex; flex-direction: column; padding: 2rem 1rem; border-right: 1px solid #f0b0c0; transition: transform 0.3s ease-in-out; z-index: 1000; }
+        .logo { font-family: var(--body-font); font-weight: 800; font-size: 2.2rem; text-transform: uppercase; letter-spacing: 1px; color: var(--primary-accent); }
+        .sidebar-nav a { display: block; padding: 1rem 1.5rem; margin-bottom: 0.5rem; border-radius: 8px; font-size: 1rem; color: var(--text-color); text-decoration: none; }
+        .sidebar-nav a i { margin-right: 1rem; width: 20px; text-align: center; color: var(--primary-accent); }
+        .sidebar-nav a:hover { background-color: rgba(255, 255, 255, 0.5); }
+        .sidebar-footer { margin-top: auto; text-align: center; }
+        .social-icons { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 1rem; }
+        .social-icons a { font-size: 1.3rem; color: #a0808c; transition: color 0.3s ease; text-decoration: none; }
+        .social-icons a:hover { color: var(--primary-accent); }
+        .sidebar-footer p { font-size: 0.8rem; color: #a0808c; }
+        #auth-trigger { margin-top: 1rem; font-weight: 600; cursor: pointer; color: var(--primary-accent); background: none; border: none; font-size: 1rem; text-decoration: underline; font-family: var(--arabic-font); }
+
+        /* Main Content & Product Grid */
+        .main-content { margin-left: 260px; flex-grow: 1; padding: 2rem 3rem; width: calc(100% - 260px); }
+        header { display: flex; justify-content: flex-end; align-items: center; height: 50px; margin-bottom: 2rem; }
+        .menu-btn { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; }
+        .product-grid { margin-bottom: 4rem; padding-top: 60px; margin-top: -60px; }
+        .product-grid h2 { font-size: 1.8rem; margin-bottom: 2rem; display: flex; align-items: center; }
+        .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 2rem; }
+        .product-card { background: white; border-radius: 15px; overflow: hidden; box-shadow: var(--shadow); text-align: center; padding-bottom: 1.5rem; transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; position: relative; }
+        .product-card:hover { transform: translateY(-10px); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); }
+        .product-card img { width: 100%; height: 300px; object-fit: cover; background-color: #eee; }
+        .product-card h3 { font-size: 1.1rem; margin: 1rem 0 0.5rem 0; }
+        .product-card .price { font-size: 1.2rem; font-weight: 700; color: var(--primary-accent); margin-bottom: 1rem; }
+        
+        .add-item-btn { margin-left: 1rem; background-color: var(--primary-accent); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 1.5rem; line-height: 30px; text-align: center; cursor: pointer; vertical-align: middle; transition: background-color 0.3s; display: none; }
+        .add-item-btn:hover { background-color: #d63c6c; }
+
+        /* Generic Modal Styles */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-overlay.show-modal { display: flex; }
+        .modal-content { background: white; padding: 2rem; border-radius: 15px; width: 90%; max-width: 800px; position: relative; max-height: 90vh; overflow-y: auto; }
+        .modal-close-btn { position: absolute; top: 1rem; right: 1.5rem; font-size: 2rem; background: none; border: none; cursor: pointer; z-index: 10; }
+
+        /* Product Detail Modal (for users) */
+        #product-modal .modal-content { display: flex; gap: 2rem; }
+        .modal-gallery { flex: 1; }
+        .modal-main-image { width: 100%; height: 400px; object-fit: cover; border-radius: 10px; margin-bottom: 1rem; }
+        .modal-thumbnails { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .modal-thumb { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; cursor: pointer; border: 2px solid transparent; }
+        .modal-thumb.active { border-color: var(--primary-accent); }
+        .modal-details { flex: 1; }
+        .modal-title, #admin-edit-modal #admin-modal-title { font-size: 2rem; margin-bottom: 0.5rem; }
+        .modal-price { font-size: 1.5rem; color: var(--primary-accent); margin-bottom: 1rem; }
+        .modal-description { font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem; }
+        .size-options { margin-bottom: 1.5rem; }
+        .size-options h4 { margin-bottom: 0.5rem; }
+        .size-btn { padding: 0.5rem 1rem; border: 1px solid #ccc; background: white; border-radius: 5px; cursor: pointer; margin: 0 0.2rem; }
+        .size-btn.active { background: var(--primary-accent); color: white; border-color: var(--primary-accent); }
+        .modal-add-to-cart, .admin-save-btn { width: 100%; padding: 1rem; background: var(--primary-accent); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: background 0.3s; }
+        .modal-add-to-cart:hover, .admin-save-btn:hover { background: #d63c6c; }
+        
+        /* Admin Edit Modal Styles */
+        #admin-edit-modal .form-group { margin-bottom: 1.2rem; }
+        #admin-edit-modal .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+        #admin-edit-modal .form-group input, #admin-edit-modal .form-group textarea { width: 100%; padding: 0.8rem; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; }
+        #admin-edit-modal .admin-images-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 1rem; margin-top: 10px; min-height: 110px; background: #f9f9f9; border-radius: 8px; padding: 10px; }
+        .admin-img-container { position: relative; }
+        .admin-img-container img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; }
+        .admin-delete-img-btn { position: absolute; top: -5px; right: -5px; background: rgba(231, 84, 128, 0.9); color: white; border: 2px solid white; border-radius: 50%; width: 24px; height: 24px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
+        #admin-add-image-btn { display: inline-block; padding: 0.5rem 1rem; background: #eee; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; margin-top: 0.5rem; }
+        #admin-add-image-btn:hover { background: #e0e0e0; }
+        #admin-main-image-preview { max-width: 150px; border-radius: 8px; margin-top: 10px; border: 1px solid #eee; object-fit: cover; display: none; }
+        
+        /* Arabic Modals */
+        .arabic-modal .modal-content { max-width: 500px; font-family: var(--arabic-font); }
+        .arabic-modal h2 { text-align: center; margin-bottom: 1.5rem; font-size: 1.8rem; color: var(--primary-accent); }
+        .arabic-modal .form-group { margin-bottom: 1rem; }
+        .arabic-modal .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+        .arabic-modal .form-group input, .arabic-modal .form-group textarea { width: 100%; padding: 0.8rem; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; font-family: var(--arabic-font); }
+        .btn-confirm { width: 100%; padding: 1rem; background: var(--primary-accent); color: white; border: none; border-radius: 8px; font-size: 1.2rem; font-weight: 600; cursor: pointer; transition: background 0.3s; font-family: var(--arabic-font); }
+        .btn-confirm:hover { background: #d63c6c; }
+        .receipt-details { line-height: 2; margin-top: 1.5rem; }
+        .receipt-details .detail-item { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px dashed #eee; }
+        .receipt-details .detail-item span:first-child { font-weight: bold; }
+
+        /* NEW/UPDATED Styles */
+        .receipt-instruction { font-family: var(--arabic-font); font-size: 1.4rem; font-weight: 700; text-align: center; color: var(--text-color); line-height: 1.6; border: 2px dashed var(--primary-accent); padding: 1rem; border-radius: 10px; }
+        #whatsapp-modal .modal-content { max-width: 400px; text-align: center; }
+        #whatsapp-modal h3 { font-size: 1.5rem; margin-bottom: 1rem; }
+        #whatsapp-modal h3 i { color: #25D366; }
+        #whatsapp-modal .whatsapp-number { font-size: 1.8rem; font-weight: bold; letter-spacing: 2px; color: var(--primary-accent); }
+        
+        /* Responsive */
+        @media (max-width: 992px) { #product-modal .modal-content { flex-direction: column; } }
+        @media (max-width: 768px) { body { display: block; } .sidebar { transform: translateX(-100%); } .sidebar.show-sidebar { transform: translateX(0); } .main-content { margin-left: 0; width: 100%; padding: 1.5rem; } header { justify-content: flex-start; } .menu-btn { display: block; } .products { grid-template-columns: 1fr 1fr; gap: 1rem; } }
+        @media (max-width: 480px) { .products { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header"><h2 class="logo">StyleBloom</h2></div>
+        <nav class="sidebar-nav">
+            <a href="#anime-section"><i class="fa-solid fa-ghost"></i> Anime</a>
+            <a href="#football-section"><i class="fa-solid fa-futbol"></i> Football</a>
+            <a href="#art-section"><i class="fa-solid fa-palette"></i> Art</a>
+            <a href="#vangogh-section"><i class="fa-solid fa-star"></i> Van Gogh</a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="social-icons">
+                <a href="#" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+                <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                <!-- UPDATED WHATSAPP ICON -->
+                <a href="javascript:void(0);" id="whatsapp-icon-trigger" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+            </div>
+            <button id="auth-trigger">التسجيل</button>
+            <p>© 2024 StyleBloom</p>
+        </div>
+    </aside>
+
+    <div class="main-content">
+        <header><button class="menu-btn" id="menu-btn"><i class="fas fa-bars"></i></button></header>
+        <main id="main-content-area">
+            <section class="product-grid" id="anime-section"><h2>Anime Collection <button class="add-item-btn" data-category="anime">+</button></h2><div class="products"></div></section>
+            <section class="product-grid" id="football-section"><h2>Football Fan Zone <button class="add-item-btn" data-category="football">+</button></h2><div class="products"></div></section>
+            <section class="product-grid" id="art-section"><h2>Artistic Apparel <button class="add-item-btn" data-category="art">+</button></h2><div class="products"></div></section>
+            <section class="product-grid" id="vangogh-section"><h2>Van Gogh Inspired <button class="add-item-btn" data-category="vangogh">+</button></h2><div class="products"></div></section>
+        </main>
+    </div>
+
+    <!-- USER PRODUCT DETAIL MODAL -->
+    <div class="modal-overlay" id="product-modal"><div class="modal-content"><button class="modal-close-btn">×</button><div class="modal-gallery"><img src="" alt="Main product image" class="modal-main-image" id="modal-main-image"><div class="modal-thumbnails" id="modal-thumbnails"></div></div><div class="modal-details"><h2 class="modal-title" id="modal-title"></h2><p class="modal-price" id="modal-price"></p><p class="modal-description" id="modal-description"></p><div class="size-options"><h4>Size:</h4><div class="size-buttons"><button class="size-btn active">S</button><button class="size-btn">M</button><button class="size-btn">L</button><button class="size-btn">XL</button></div></div><button class="modal-add-to-cart">Add to Cart</button></div></div></div>
+    
+    <!-- ADMIN EDIT/CREATE MODAL -->
+    <div class="modal-overlay" id="admin-edit-modal"><div class="modal-content"><button class="modal-close-btn">×</button><h2 id="admin-modal-title">Edit Product</h2><div class="form-group"><label for="admin-product-name">Product Name</label><input type="text" id="admin-product-name"></div><div class="form-group"><label for="admin-product-price">Product Price</label><input type="text" id="admin-product-price"></div><div class="form-group"><label for="admin-product-desc">Product Description</label><textarea id="admin-product-desc" rows="3"></textarea></div><div class="form-group"><label for="admin-product-main-image-url">Main Image URL (Cover)</label><input type="text" id="admin-product-main-image-url"><img id="admin-main-image-preview" src="" alt="Main image preview"></div><div class="form-group"><label>Additional Images (Colors/Variants)</label><button id="admin-add-image-btn"><i class="fas fa-plus"></i> Add Image from URL</button><div class="admin-images-grid" id="admin-images-grid"></div></div><button class="admin-save-btn" id="admin-save-btn">Save Changes</button></div></div>
+
+    <!-- CHECKOUT MODAL -->
+    <div class="modal-overlay arabic-modal" id="checkout-modal" dir="rtl"><div class="modal-content"><button class="modal-close-btn">×</button><h2>استكمال الطلب</h2><form id="checkout-form"><div class="form-group"><label for="customer-name">الاسم بالكامل</label><input type="text" id="customer-name" required></div><div class="form-group"><label for="customer-phone">رقم الهاتف</label><input type="tel" id="customer-phone" required></div><div class="form-group"><label for="customer-governorate">المحافظة</label><input type="text" id="customer-governorate" required></div><div class="form-group"><label for="customer-address">العنوان بالتفصيل</label><textarea id="customer-address" required></textarea></div><button type="submit" class="btn-confirm">تأكيد الطلب</button></form></div></div>
+    
+    <!-- RECEIPT MODAL (UPDATED) -->
+    <div class="modal-overlay arabic-modal" id="receipt-modal" dir="rtl">
+        <div class="modal-content">
+            <button class="modal-close-btn">×</button>
+            <!-- NEW INSTRUCTION BOX -->
+            <p class="receipt-instruction">لتأكيد طلبك يرجى اخذ لقطه شاشه لتفاصيل الطلب وارسالها علي الواتس اب علي الرقم <br><strong>01212656745</strong></p>
+            <div class="receipt-details">
+                <div class="detail-item"><span>المنتج:</span><span id="receipt-product-name"></span></div>
+                <div class="detail-item"><span>السعر:</span><span id="receipt-product-price"></span></div>
+                <div class="detail-item"><span>المقاس:</span><span id="receipt-product-size"></span></div><hr>
+                <div class="detail-item"><span>الاسم:</span><span id="receipt-customer-name"></span></div>
+                <div class="detail-item"><span>الهاتف:</span><span id="receipt-customer-phone"></span></div>
+                <div class="detail-item"><span>المحافظة:</span><span id="receipt-customer-governorate"></span></div>
+                <div class="detail-item"><span>العنوان:</span><span id="receipt-customer-address"></span></div>
+            </div>
+            <button class="btn-confirm" id="receipt-close-btn" style="margin-top: 1.5rem;">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- NEW WHATSAPP MODAL -->
+    <div class="modal-overlay arabic-modal" id="whatsapp-modal" dir="rtl">
+        <div class="modal-content">
+            <button class="modal-close-btn">×</button>
+            <h3><i class="fa-brands fa-whatsapp"></i> تواصل معنا عبر الواتس اب</h3>
+            <p class="whatsapp-number">01212656745</p>
+        </div>
+    </div>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        let productsData = {
+            anime: { 'a1': { name: 'Gojo Satoru Tee', price: 'EGP 350.00', description: 'Jujutsu Kaisen inspired t-shirt.', mainImage: 'https://placehold.co/600x800/34495e/ffffff?text=Gojo+Tee', otherImages: ['https://placehold.co/600x800/ecf0f1/2c3e50?text=White+Ver.'] }, 'a2': { name: 'AOT Hoodie', price: 'EGP 550.00', description: 'Join the Survey Corps.', mainImage: 'https://placehold.co/600x800/27ae60/ffffff?text=AOT+Hoodie', otherImages: [] }, },
+            football: { 'f1': { name: 'Madrid 24/25 Kit', price: 'EGP 400.00', description: 'Home kit for the kings of Europe.', mainImage: 'https://placehold.co/600x800/ffffff/000000?text=Madrid+Kit', otherImages: ['https://placehold.co/600x800/d35400/ffffff?text=Away+Kit'] }, },
+            art: { 'ar1': { name: 'The Great Wave Tee', price: 'EGP 320.00', description: 'Hokusai-inspired t-shirt.', mainImage: 'https://placehold.co/600x800/2980b9/ffffff?text=The+Great+Wave', otherImages: [] }, },
+            vangogh: { 'vg1': { name: 'Starry Night Hoodie', price: 'EGP 600.00', description: 'Van Gogh\'s Starry Night.', mainImage: 'https://placehold.co/600x800/1e3799/ffffff?text=Starry+Night', otherImages: ['https://placehold.co/600x800/000000/ffffff?text=Black+Edition'] }, }
+        };
+        const ADMIN_EMAIL = "naseahmed366@gmail.com";
+        let isAdmin = false;
+        let currentOrderDetails = {};
+        let currentlyEditing = { category: null, id: null };
+        const productModal = document.getElementById('product-modal');
+        const adminEditModal = document.getElementById('admin-edit-modal');
+        const checkoutModal = document.getElementById('checkout-modal');
+        const receiptModal = document.getElementById('receipt-modal');
+        const whatsappModal = document.getElementById('whatsapp-modal');
+        function openModal(modal) { modal.classList.add('show-modal'); }
+        function closeModal(modal) { modal.classList.remove('show-modal'); }
+        function createProductCard(category, id, product) {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.dataset.productId = id;
+            card.dataset.category = category;
+            const imgSrc = product.mainImage || 'https://placehold.co/600x800/ccc/ffffff?text=No+Image';
+            card.innerHTML = `<img src="${imgSrc}" alt="${product.name}"><h3>${product.name}</h3><p class="price">${product.price}</p>`;
+            return card;
+        }
+        function populateCategorySection(categoryKey) {
+            const section = document.querySelector(`#${categoryKey}-section .products`);
+            if (section) {
+                section.innerHTML = '';
+                Object.keys(productsData[categoryKey]).forEach(productId => {
+                    const card = createProductCard(categoryKey, productId, productsData[categoryKey][productId]);
+                    section.appendChild(card);
+                });
+            }
+        }
+        function populateAllSections() { Object.keys(productsData).forEach(populateCategorySection); }
+        function refreshProductCard(category, id) {
+             const product = productsData[category][id];
+             const card = document.querySelector(`.product-card[data-category='${category}'][data-product-id='${id}']`);
+             if(card) {
+                card.querySelector('img').src = product.mainImage || 'https://placehold.co/600x800/ccc/ffffff?text=No+Image';
+                card.querySelector('h3').textContent = product.name;
+                card.querySelector('.price').textContent = product.price;
+             }
+        }
+        function updateAdminUI(isAdmin) {
+            const authBtn = document.getElementById('auth-trigger');
+            authBtn.textContent = isAdmin ? 'Logout' : 'التسجيل';
+            authBtn.style.textDecoration = isAdmin ? 'none' : 'underline';
+            document.querySelectorAll('.add-item-btn').forEach(btn => btn.style.display = isAdmin ? 'inline-block' : 'none');
+        }
+        function openUserProductModal(product) {
+            document.getElementById('modal-main-image').src = product.mainImage;
+            document.getElementById('modal-title').textContent = product.name;
+            document.getElementById('modal-price').textContent = product.price;
+            document.getElementById('modal-description').textContent = product.description;
+            const thumbnailsContainer = document.getElementById('modal-thumbnails');
+            thumbnailsContainer.innerHTML = '';
+            const allImages = [product.mainImage, ...product.otherImages];
+            allImages.forEach((imgSrc, index) => {
+                const thumb = document.createElement('img');
+                thumb.src = imgSrc;
+                thumb.className = 'modal-thumb';
+                if (index === 0) thumb.classList.add('active');
+                thumb.addEventListener('click', () => {
+                    document.getElementById('modal-main-image').src = imgSrc;
+                    thumbnailsContainer.querySelector('.active')?.classList.remove('active');
+                    thumb.classList.add('active');
+                });
+                thumbnailsContainer.appendChild(thumb);
+            });
+            openModal(productModal);
+        }
+        function openAdminModal(category, id = null) {
+            currentlyEditing = { category, id };
+            const isCreating = id === null;
+            const product = isCreating ? { name: '', price: 'EGP 0.00', description: '', mainImage: '', otherImages: [] } : productsData[category][id];
+            document.getElementById('admin-modal-title').textContent = isCreating ? "Create New Product" : "Edit Product";
+            document.getElementById('admin-product-name').value = product.name;
+            document.getElementById('admin-product-price').value = product.price;
+            document.getElementById('admin-product-desc').value = product.description;
+            document.getElementById('admin-product-main-image-url').value = product.mainImage;
+            const preview = document.getElementById('admin-main-image-preview');
+            preview.src = product.mainImage;
+            preview.style.display = product.mainImage ? 'block' : 'none';
+            populateAdminImages(product.otherImages);
+            openModal(adminEditModal);
+        }
+        function populateAdminImages(images) {
+            const grid = document.getElementById('admin-images-grid');
+            grid.innerHTML = '';
+            images.forEach(imgSrc => addImageToAdminGrid(imgSrc));
+        }
+        function addImageToAdminGrid(imgSrc) {
+            const grid = document.getElementById('admin-images-grid');
+            const container = document.createElement('div');
+            container.className = 'admin-img-container';
+            container.innerHTML = `<img src="${imgSrc}"><button class="admin-delete-img-btn">×</button>`;
+            grid.appendChild(container);
+            container.querySelector('.admin-delete-img-btn').addEventListener('click', () => container.remove());
+        }
+
+        // --- EVENT LISTENERS ---
+        document.getElementById('auth-trigger').addEventListener('click', () => {
+            if (isAdmin) { isAdmin = false; updateAdminUI(false); alert('Logged out.'); } 
+            else {
+                const email = prompt("Please enter your admin email:");
+                if (email && email.toLowerCase() === ADMIN_EMAIL) { isAdmin = true; updateAdminUI(true); alert('Admin mode activated!'); } 
+                else if (email) { alert('Incorrect email.'); }
+            }
+        });
+        document.getElementById('main-content-area').addEventListener('click', (e) => {
+            const card = e.target.closest('.product-card');
+            if (card) {
+                const { productId, category } = card.dataset;
+                isAdmin ? openAdminModal(category, productId) : openUserProductModal(productsData[category][productId]);
+            }
+            const addBtn = e.target.closest('.add-item-btn');
+            if (addBtn && isAdmin) { openAdminModal(addBtn.dataset.category); }
+        });
+        document.getElementById('admin-product-main-image-url').addEventListener('input', (e) => {
+            const preview = document.getElementById('admin-main-image-preview');
+            preview.src = e.target.value;
+            preview.style.display = e.target.value ? 'block' : 'none';
+        });
+        document.getElementById('admin-add-image-btn').addEventListener('click', () => {
+            const imageUrl = prompt("Enter URL:", "https://placehold.co/600x800");
+            if (imageUrl) addImageToAdminGrid(imageUrl);
+        });
+        document.getElementById('admin-save-btn').addEventListener('click', () => {
+            const { category, id } = currentlyEditing;
+            const mainImage = document.getElementById('admin-product-main-image-url').value;
+            const name = document.getElementById('admin-product-name').value;
+            if (!name || !mainImage) { alert("Name and Main Image URL are required."); return; }
+            const newProductData = {
+                name, price: document.getElementById('admin-product-price').value, description: document.getElementById('admin-product-desc').value, mainImage,
+                otherImages: Array.from(document.querySelectorAll('#admin-images-grid img')).map(img => img.src)
+            };
+            if (id === null) { const newId = category.charAt(0) + Date.now(); productsData[category][newId] = newProductData; const newCard = createProductCard(category, newId, newProductData); document.querySelector(`#${category}-section .products`).appendChild(newCard); } 
+            else { productsData[category][id] = newProductData; refreshProductCard(category, id); }
+            closeModal(adminEditModal);
+        });
+        productModal.querySelector('.size-buttons').addEventListener('click', (e) => {
+            if (e.target.classList.contains('size-btn')) {
+                productModal.querySelector('.size-btn.active')?.classList.remove('active');
+                e.target.classList.add('active');
+            }
+        });
+        productModal.querySelector('.modal-add-to-cart').addEventListener('click', () => {
+            currentOrderDetails.name = productModal.querySelector('.modal-title').textContent;
+            currentOrderDetails.price = productModal.querySelector('.modal-price').textContent;
+            currentOrderDetails.size = productModal.querySelector('.size-btn.active').textContent;
+            closeModal(productModal);
+            openModal(checkoutModal);
+        });
+        document.getElementById('checkout-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            document.getElementById('receipt-product-name').textContent = currentOrderDetails.name;
+            document.getElementById('receipt-product-price').textContent = currentOrderDetails.price;
+            document.getElementById('receipt-product-size').textContent = currentOrderDetails.size;
+            document.getElementById('receipt-customer-name').textContent = document.getElementById('customer-name').value;
+            document.getElementById('receipt-customer-phone').textContent = document.getElementById('customer-phone').value;
+            document.getElementById('receipt-customer-governorate').textContent = document.getElementById('customer-governorate').value;
+            document.getElementById('receipt-customer-address').textContent = document.getElementById('customer-address').value;
+            closeModal(checkoutModal);
+            e.target.reset();
+            openModal(receiptModal);
+        });
+        document.getElementById('whatsapp-icon-trigger').addEventListener('click', (e) => {
+            e.preventDefault();
+            openModal(whatsappModal);
+        });
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(modal); });
+            modal.querySelector('.modal-close-btn')?.addEventListener('click', () => closeModal(modal));
+        });
+        document.getElementById('receipt-close-btn').addEventListener('click', () => closeModal(receiptModal));
+        const menuBtn = document.getElementById('menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        menuBtn.addEventListener('click', () => sidebar.classList.toggle('show-sidebar'));
+        document.addEventListener('click', (e) => {
+            if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) { sidebar.classList.remove('show-sidebar'); }
+        });
+        populateAllSections();
+    });
+    </script>
+</body>
+</html>
