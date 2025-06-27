@@ -36,7 +36,8 @@
         .social-icons a { font-size: 1.3rem; color: #a0808c; transition: color 0.3s ease; text-decoration: none; }
         .social-icons a:hover { color: var(--primary-accent); }
         .sidebar-footer p { font-size: 0.8rem; color: #a0808c; }
-        #auth-trigger { margin-top: 1rem; font-weight: 600; cursor: pointer; color: var(--primary-accent); background: none; border: none; font-size: 1rem; text-decoration: underline; font-family: var(--arabic-font); }
+        .footer-btn { margin-top: 1rem; font-weight: 600; cursor: pointer; color: var(--primary-accent); background: none; border: none; font-size: 1rem; text-decoration: underline; font-family: var(--arabic-font); padding: 5px; }
+        #reset-data-btn { display: none; color: #c0392b; }
 
         /* Main Content & Product Grid */
         .main-content { margin-left: 260px; flex-grow: 1; padding: 2rem 3rem; width: calc(100% - 260px); }
@@ -50,7 +51,6 @@
         .product-card img { width: 100%; height: 300px; object-fit: cover; background-color: #eee; }
         .product-card h3 { font-size: 1.1rem; margin: 1rem 0 0.5rem 0; }
         .product-card .price { font-size: 1.2rem; font-weight: 700; color: var(--primary-accent); margin-bottom: 1rem; }
-        
         .add-item-btn { margin-left: 1rem; background-color: var(--primary-accent); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 1.5rem; line-height: 30px; text-align: center; cursor: pointer; vertical-align: middle; transition: background-color 0.3s; display: none; }
         .add-item-btn:hover { background-color: #d63c6c; }
 
@@ -101,18 +101,13 @@
         .receipt-details { line-height: 2; margin-top: 1.5rem; }
         .receipt-details .detail-item { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px dashed #eee; }
         .receipt-details .detail-item span:first-child { font-weight: bold; }
-
-        /* NEW/UPDATED Styles */
         .receipt-instruction { font-family: var(--arabic-font); font-size: 1.4rem; font-weight: 700; text-align: center; color: var(--text-color); line-height: 1.6; border: 2px dashed var(--primary-accent); padding: 1rem; border-radius: 10px; }
         #whatsapp-modal .modal-content { max-width: 400px; text-align: center; }
         #whatsapp-modal h3 { font-size: 1.5rem; margin-bottom: 1rem; }
         #whatsapp-modal h3 i { color: #25D366; }
         #whatsapp-modal .whatsapp-number { font-size: 1.8rem; font-weight: bold; letter-spacing: 2px; color: var(--primary-accent); }
         
-        /* Responsive */
-        @media (max-width: 992px) { #product-modal .modal-content { flex-direction: column; } }
         @media (max-width: 768px) { body { display: block; } .sidebar { transform: translateX(-100%); } .sidebar.show-sidebar { transform: translateX(0); } .main-content { margin-left: 0; width: 100%; padding: 1.5rem; } header { justify-content: flex-start; } .menu-btn { display: block; } .products { grid-template-columns: 1fr 1fr; gap: 1rem; } }
-        @media (max-width: 480px) { .products { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -129,10 +124,10 @@
             <div class="social-icons">
                 <a href="#" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
                 <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-                <!-- UPDATED WHATSAPP ICON -->
                 <a href="javascript:void(0);" id="whatsapp-icon-trigger" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
             </div>
-            <button id="auth-trigger">التسجيل</button>
+            <button id="auth-trigger" class="footer-btn">التسجيل</button>
+            <button id="reset-data-btn" class="footer-btn">Reset Data</button>
             <p>© 2024 StyleBloom</p>
         </div>
     </aside>
@@ -147,231 +142,254 @@
         </main>
     </div>
 
-    <!-- USER PRODUCT DETAIL MODAL -->
-    <div class="modal-overlay" id="product-modal"><div class="modal-content"><button class="modal-close-btn">×</button><div class="modal-gallery"><img src="" alt="Main product image" class="modal-main-image" id="modal-main-image"><div class="modal-thumbnails" id="modal-thumbnails"></div></div><div class="modal-details"><h2 class="modal-title" id="modal-title"></h2><p class="modal-price" id="modal-price"></p><p class="modal-description" id="modal-description"></p><div class="size-options"><h4>Size:</h4><div class="size-buttons"><button class="size-btn active">S</button><button class="size-btn">M</button><button class="size-btn">L</button><button class="size-btn">XL</button></div></div><button class="modal-add-to-cart">Add to Cart</button></div></div></div>
+    <!-- User Product Detail Modal -->
+    <div class="modal-overlay" id="product-modal"><div class="modal-content"><button class="modal-close-btn">×</button><div class="modal-gallery"><img src="" alt="Main product image" class="modal-main-image"><div class="modal-thumbnails"></div></div><div class="modal-details"><h2 class="modal-title"></h2><p class="modal-price"></p><p class="modal-description"></p><div class="size-options"><h4>Size:</h4><div class="size-buttons"><button class="size-btn active">S</button><button class="size-btn">M</button><button class="size-btn">L</button><button class="size-btn">XL</button></div></div><button class="modal-add-to-cart">Add to Cart</button></div></div></div>
     
-    <!-- ADMIN EDIT/CREATE MODAL -->
-    <div class="modal-overlay" id="admin-edit-modal"><div class="modal-content"><button class="modal-close-btn">×</button><h2 id="admin-modal-title">Edit Product</h2><div class="form-group"><label for="admin-product-name">Product Name</label><input type="text" id="admin-product-name"></div><div class="form-group"><label for="admin-product-price">Product Price</label><input type="text" id="admin-product-price"></div><div class="form-group"><label for="admin-product-desc">Product Description</label><textarea id="admin-product-desc" rows="3"></textarea></div><div class="form-group"><label for="admin-product-main-image-url">Main Image URL (Cover)</label><input type="text" id="admin-product-main-image-url"><img id="admin-main-image-preview" src="" alt="Main image preview"></div><div class="form-group"><label>Additional Images (Colors/Variants)</label><button id="admin-add-image-btn"><i class="fas fa-plus"></i> Add Image from URL</button><div class="admin-images-grid" id="admin-images-grid"></div></div><button class="admin-save-btn" id="admin-save-btn">Save Changes</button></div></div>
-
-    <!-- CHECKOUT MODAL -->
-    <div class="modal-overlay arabic-modal" id="checkout-modal" dir="rtl"><div class="modal-content"><button class="modal-close-btn">×</button><h2>استكمال الطلب</h2><form id="checkout-form"><div class="form-group"><label for="customer-name">الاسم بالكامل</label><input type="text" id="customer-name" required></div><div class="form-group"><label for="customer-phone">رقم الهاتف</label><input type="tel" id="customer-phone" required></div><div class="form-group"><label for="customer-governorate">المحافظة</label><input type="text" id="customer-governorate" required></div><div class="form-group"><label for="customer-address">العنوان بالتفصيل</label><textarea id="customer-address" required></textarea></div><button type="submit" class="btn-confirm">تأكيد الطلب</button></form></div></div>
+    <!-- Admin Edit/Create Modal -->
+    <div class="modal-overlay" id="admin-edit-modal"><div class="modal-content"><button class="modal-close-btn">×</button><h2 id="admin-modal-title"></h2><div class="form-group"><label for="admin-product-name">Product Name</label><input type="text" id="admin-product-name"></div><div class="form-group"><label for="admin-product-price">Product Price</label><input type="text" id="admin-product-price"></div><div class="form-group"><label for="admin-product-desc">Product Description</label><textarea id="admin-product-desc" rows="3"></textarea></div><div class="form-group"><label for="admin-product-main-image-url">Main Image URL</label><input type="text" id="admin-product-main-image-url"><img id="admin-main-image-preview"></div><div class="form-group"><label>Additional Images</label><button id="admin-add-image-btn"><i class="fas fa-plus"></i> Add URL</button><div class="admin-images-grid" id="admin-images-grid"></div></div><button class="admin-save-btn">Save Changes</button></div></div>
     
-    <!-- RECEIPT MODAL (UPDATED) -->
-    <div class="modal-overlay arabic-modal" id="receipt-modal" dir="rtl">
-        <div class="modal-content">
-            <button class="modal-close-btn">×</button>
-            <!-- NEW INSTRUCTION BOX -->
-            <p class="receipt-instruction">لتأكيد طلبك يرجى اخذ لقطه شاشه لتفاصيل الطلب وارسالها علي الواتس اب علي الرقم <br><strong>01212656745</strong></p>
-            <div class="receipt-details">
-                <div class="detail-item"><span>المنتج:</span><span id="receipt-product-name"></span></div>
-                <div class="detail-item"><span>السعر:</span><span id="receipt-product-price"></span></div>
-                <div class="detail-item"><span>المقاس:</span><span id="receipt-product-size"></span></div><hr>
-                <div class="detail-item"><span>الاسم:</span><span id="receipt-customer-name"></span></div>
-                <div class="detail-item"><span>الهاتف:</span><span id="receipt-customer-phone"></span></div>
-                <div class="detail-item"><span>المحافظة:</span><span id="receipt-customer-governorate"></span></div>
-                <div class="detail-item"><span>العنوان:</span><span id="receipt-customer-address"></span></div>
-            </div>
-            <button class="btn-confirm" id="receipt-close-btn" style="margin-top: 1.5rem;">إغلاق</button>
-        </div>
-    </div>
-
-    <!-- NEW WHATSAPP MODAL -->
-    <div class="modal-overlay arabic-modal" id="whatsapp-modal" dir="rtl">
-        <div class="modal-content">
-            <button class="modal-close-btn">×</button>
-            <h3><i class="fa-brands fa-whatsapp"></i> تواصل معنا عبر الواتس اب</h3>
-            <p class="whatsapp-number">01212656745</p>
-        </div>
-    </div>
-
+    <!-- Checkout Modal -->
+    <div class="modal-overlay arabic-modal" id="checkout-modal"><div class="modal-content"><button class="modal-close-btn">×</button><h2>استكمال الطلب</h2><form id="checkout-form"><div class="form-group"><label for="customer-name">الاسم بالكامل</label><input type="text" id="customer-name" required></div><div class="form-group"><label for="customer-phone">رقم الهاتف</label><input type="tel" id="customer-phone" required></div><div class="form-group"><label for="customer-governorate">المحافظة</label><input type="text" id="customer-governorate" required></div><div class="form-group"><label for="customer-address">العنوان بالتفصيل</label><textarea id="customer-address" required></textarea></div><button type="submit" class="btn-confirm">تأكيد الطلب</button></form></div></div>
+    
+    <!-- Receipt Modal -->
+    <div class="modal-overlay arabic-modal" id="receipt-modal"><div class="modal-content"><button class="modal-close-btn">×</button><p class="receipt-instruction">لتأكيد طلبك يرجى اخذ لقطه شاشه لتفاصيل الطلب وارسالها علي الواتس اب علي الرقم <br><strong>01212656745</strong></p><div class="receipt-details"><div class="detail-item"><span>المنتج:</span><span id="receipt-product-name"></span></div><div class="detail-item"><span>السعر:</span><span id="receipt-product-price"></span></div><div class="detail-item"><span>المقاس:</span><span id="receipt-product-size"></span></div><hr><div class="detail-item"><span>الاسم:</span><span id="receipt-customer-name"></span></div><div class="detail-item"><span>الهاتف:</span><span id="receipt-customer-phone"></span></div><div class="detail-item"><span>المحافظة:</span><span id="receipt-customer-governorate"></span></div><div class="detail-item"><span>العنوان:</span><span id="receipt-customer-address"></span></div></div><button class="btn-confirm" id="receipt-close-btn" style="margin-top: 1.5rem;">إغلاق</button></div></div>
+    
+    <!-- WhatsApp Modal -->
+    <div class="modal-overlay arabic-modal" id="whatsapp-modal"><div class="modal-content"><button class="modal-close-btn">×</button><h3><i class="fa-brands fa-whatsapp"></i> تواصل معنا عبر الواتس اب</h3><p class="whatsapp-number">01212656745</p></div></div>
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        let productsData = {
-            anime: { 'a1': { name: 'Gojo Satoru Tee', price: 'EGP 350.00', description: 'Jujutsu Kaisen inspired t-shirt.', mainImage: 'https://placehold.co/600x800/34495e/ffffff?text=Gojo+Tee', otherImages: ['https://placehold.co/600x800/ecf0f1/2c3e50?text=White+Ver.'] }, 'a2': { name: 'AOT Hoodie', price: 'EGP 550.00', description: 'Join the Survey Corps.', mainImage: 'https://placehold.co/600x800/27ae60/ffffff?text=AOT+Hoodie', otherImages: [] }, },
-            football: { 'f1': { name: 'Madrid 24/25 Kit', price: 'EGP 400.00', description: 'Home kit for the kings of Europe.', mainImage: 'https://placehold.co/600x800/ffffff/000000?text=Madrid+Kit', otherImages: ['https://placehold.co/600x800/d35400/ffffff?text=Away+Kit'] }, },
-            art: { 'ar1': { name: 'The Great Wave Tee', price: 'EGP 320.00', description: 'Hokusai-inspired t-shirt.', mainImage: 'https://placehold.co/600x800/2980b9/ffffff?text=The+Great+Wave', otherImages: [] }, },
-            vangogh: { 'vg1': { name: 'Starry Night Hoodie', price: 'EGP 600.00', description: 'Van Gogh\'s Starry Night.', mainImage: 'https://placehold.co/600x800/1e3799/ffffff?text=Starry+Night', otherImages: ['https://placehold.co/600x800/000000/ffffff?text=Black+Edition'] }, }
-        };
+        // --- DATA HANDLING & STATE ---
         const ADMIN_EMAIL = "naseahmed366@gmail.com";
+        const LOCAL_STORAGE_KEY = 'styleBloomProductsData_v1'; // Use a versioned key
+        let productsData = {};
         let isAdmin = false;
         let currentOrderDetails = {};
         let currentlyEditing = { category: null, id: null };
-        const productModal = document.getElementById('product-modal');
-        const adminEditModal = document.getElementById('admin-edit-modal');
-        const checkoutModal = document.getElementById('checkout-modal');
-        const receiptModal = document.getElementById('receipt-modal');
-        const whatsappModal = document.getElementById('whatsapp-modal');
-        function openModal(modal) { modal.classList.add('show-modal'); }
-        function closeModal(modal) { modal.classList.remove('show-modal'); }
-        function createProductCard(category, id, product) {
-            const card = document.createElement('div');
-            card.className = 'product-card';
-            card.dataset.productId = id;
-            card.dataset.category = category;
-            const imgSrc = product.mainImage || 'https://placehold.co/600x800/ccc/ffffff?text=No+Image';
-            card.innerHTML = `<img src="${imgSrc}" alt="${product.name}"><h3>${product.name}</h3><p class="price">${product.price}</p>`;
-            return card;
-        }
-        function populateCategorySection(categoryKey) {
-            const section = document.querySelector(`#${categoryKey}-section .products`);
-            if (section) {
-                section.innerHTML = '';
-                Object.keys(productsData[categoryKey]).forEach(productId => {
-                    const card = createProductCard(categoryKey, productId, productsData[categoryKey][productId]);
-                    section.appendChild(card);
-                });
+
+        const defaultProductsData = {
+            anime: { 'a1': { name: 'Gojo Satoru Tee', price: 'EGP 350.00', description: 'Jujutsu Kaisen inspired.', mainImage: 'https://placehold.co/600x800/34495e/ffffff?text=Gojo+Tee', otherImages: ['https://placehold.co/600x800/ecf0f1/2c3e50?text=White+Ver.'] } },
+            football: { 'f1': { name: 'Madrid 24/25 Kit', price: 'EGP 400.00', description: 'Home kit for kings.', mainImage: 'https://placehold.co/600x800/ffffff/000000?text=Madrid+Kit', otherImages: [] } },
+            art: { 'ar1': { name: 'The Great Wave Tee', price: 'EGP 320.00', description: 'Hokusai-inspired.', mainImage: 'https://placehold.co/600x800/2980b9/ffffff?text=Great+Wave', otherImages: [] } },
+            vangogh: { 'vg1': { name: 'Starry Night Hoodie', price: 'EGP 600.00', description: 'Van Gogh\'s masterpiece.', mainImage: 'https://placehold.co/600x800/1e3799/ffffff?text=Starry+Night', otherImages: [] } }
+        };
+
+        // --- CORE FUNCTIONS ---
+        function saveData() {
+            try {
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(productsData));
+            } catch (e) {
+                console.error("Failed to save data to localStorage", e);
             }
         }
-        function populateAllSections() { Object.keys(productsData).forEach(populateCategorySection); }
-        function refreshProductCard(category, id) {
-             const product = productsData[category][id];
-             const card = document.querySelector(`.product-card[data-category='${category}'][data-product-id='${id}']`);
-             if(card) {
-                card.querySelector('img').src = product.mainImage || 'https://placehold.co/600x800/ccc/ffffff?text=No+Image';
-                card.querySelector('h3').textContent = product.name;
-                card.querySelector('.price').textContent = product.price;
-             }
+
+        function loadData() {
+            const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (savedData) {
+                productsData = JSON.parse(savedData);
+            } else {
+                productsData = JSON.parse(JSON.stringify(defaultProductsData)); // Deep copy
+                saveData();
+            }
         }
+
+        function openModal(modalId) { document.getElementById(modalId).classList.add('show-modal'); }
+        function closeModal(modalId) { document.getElementById(modalId).classList.remove('show-modal'); }
+
+        function populateAllSections() {
+            document.querySelectorAll('.products').forEach(p => p.innerHTML = '');
+            Object.keys(productsData).forEach(categoryKey => {
+                const section = document.querySelector(`#${categoryKey}-section .products`);
+                if (section) {
+                    Object.keys(productsData[categoryKey]).forEach(productId => {
+                        const product = productsData[categoryKey][productId];
+                        const card = document.createElement('div');
+                        card.className = 'product-card';
+                        card.dataset.productId = productId;
+                        card.dataset.category = categoryKey;
+                        const imgSrc = product.mainImage || 'https://placehold.co/600x800/ccc/ffffff?text=No+Image';
+                        card.innerHTML = `<img src="${imgSrc}" alt="${product.name}"><h3>${product.name}</h3><p class="price">${product.price}</p>`;
+                        section.appendChild(card);
+                    });
+                }
+            });
+        }
+
         function updateAdminUI(isAdmin) {
-            const authBtn = document.getElementById('auth-trigger');
-            authBtn.textContent = isAdmin ? 'Logout' : 'التسجيل';
-            authBtn.style.textDecoration = isAdmin ? 'none' : 'underline';
+            document.getElementById('auth-trigger').textContent = isAdmin ? 'Logout' : 'التسجيل';
+            document.getElementById('reset-data-btn').style.display = isAdmin ? 'inline-block' : 'none';
             document.querySelectorAll('.add-item-btn').forEach(btn => btn.style.display = isAdmin ? 'inline-block' : 'none');
         }
+
+        // --- MODAL DISPLAY LOGIC ---
         function openUserProductModal(product) {
-            document.getElementById('modal-main-image').src = product.mainImage;
-            document.getElementById('modal-title').textContent = product.name;
-            document.getElementById('modal-price').textContent = product.price;
-            document.getElementById('modal-description').textContent = product.description;
-            const thumbnailsContainer = document.getElementById('modal-thumbnails');
+            const pm = document.getElementById('product-modal');
+            pm.querySelector('.modal-main-image').src = product.mainImage;
+            pm.querySelector('.modal-title').textContent = product.name;
+            pm.querySelector('.modal-price').textContent = product.price;
+            pm.querySelector('.modal-description').textContent = product.description;
+            const thumbnailsContainer = pm.querySelector('.modal-thumbnails');
             thumbnailsContainer.innerHTML = '';
-            const allImages = [product.mainImage, ...product.otherImages];
-            allImages.forEach((imgSrc, index) => {
+            [product.mainImage, ...product.otherImages].forEach((imgSrc, index) => {
+                if (!imgSrc) return;
                 const thumb = document.createElement('img');
                 thumb.src = imgSrc;
                 thumb.className = 'modal-thumb';
                 if (index === 0) thumb.classList.add('active');
-                thumb.addEventListener('click', () => {
-                    document.getElementById('modal-main-image').src = imgSrc;
+                thumb.addEventListener('click', (e) => {
+                    pm.querySelector('.modal-main-image').src = e.target.src;
                     thumbnailsContainer.querySelector('.active')?.classList.remove('active');
-                    thumb.classList.add('active');
+                    e.target.classList.add('active');
                 });
                 thumbnailsContainer.appendChild(thumb);
             });
-            openModal(productModal);
+            openModal('product-modal');
         }
+
         function openAdminModal(category, id = null) {
             currentlyEditing = { category, id };
             const isCreating = id === null;
             const product = isCreating ? { name: '', price: 'EGP 0.00', description: '', mainImage: '', otherImages: [] } : productsData[category][id];
-            document.getElementById('admin-modal-title').textContent = isCreating ? "Create New Product" : "Edit Product";
-            document.getElementById('admin-product-name').value = product.name;
-            document.getElementById('admin-product-price').value = product.price;
-            document.getElementById('admin-product-desc').value = product.description;
-            document.getElementById('admin-product-main-image-url').value = product.mainImage;
-            const preview = document.getElementById('admin-main-image-preview');
+            
+            const am = document.getElementById('admin-edit-modal');
+            am.querySelector('#admin-modal-title').textContent = isCreating ? "Create New Product" : "Edit Product";
+            am.querySelector('#admin-product-name').value = product.name;
+            am.querySelector('#admin-product-price').value = product.price;
+            am.querySelector('#admin-product-desc').value = product.description;
+            am.querySelector('#admin-product-main-image-url').value = product.mainImage;
+            const preview = am.querySelector('#admin-main-image-preview');
             preview.src = product.mainImage;
             preview.style.display = product.mainImage ? 'block' : 'none';
-            populateAdminImages(product.otherImages);
-            openModal(adminEditModal);
-        }
-        function populateAdminImages(images) {
-            const grid = document.getElementById('admin-images-grid');
+            const grid = am.querySelector('#admin-images-grid');
             grid.innerHTML = '';
-            images.forEach(imgSrc => addImageToAdminGrid(imgSrc));
+            product.otherImages.forEach(url => addImageToAdminGrid(url));
+            openModal('admin-edit-modal');
         }
-        function addImageToAdminGrid(imgSrc) {
+
+        function addImageToAdminGrid(url) {
             const grid = document.getElementById('admin-images-grid');
             const container = document.createElement('div');
             container.className = 'admin-img-container';
-            container.innerHTML = `<img src="${imgSrc}"><button class="admin-delete-img-btn">×</button>`;
+            container.innerHTML = `<img src="${url}"><button class="admin-delete-img-btn">×</button>`;
             grid.appendChild(container);
-            container.querySelector('.admin-delete-img-btn').addEventListener('click', () => container.remove());
         }
 
-        // --- EVENT LISTENERS ---
-        document.getElementById('auth-trigger').addEventListener('click', () => {
-            if (isAdmin) { isAdmin = false; updateAdminUI(false); alert('Logged out.'); } 
-            else {
-                const email = prompt("Please enter your admin email:");
-                if (email && email.toLowerCase() === ADMIN_EMAIL) { isAdmin = true; updateAdminUI(true); alert('Admin mode activated!'); } 
-                else if (email) { alert('Incorrect email.'); }
-            }
-        });
-        document.getElementById('main-content-area').addEventListener('click', (e) => {
-            const card = e.target.closest('.product-card');
-            if (card) {
-                const { productId, category } = card.dataset;
-                isAdmin ? openAdminModal(category, productId) : openUserProductModal(productsData[category][productId]);
-            }
-            const addBtn = e.target.closest('.add-item-btn');
-            if (addBtn && isAdmin) { openAdminModal(addBtn.dataset.category); }
-        });
-        document.getElementById('admin-product-main-image-url').addEventListener('input', (e) => {
-            const preview = document.getElementById('admin-main-image-preview');
-            preview.src = e.target.value;
-            preview.style.display = e.target.value ? 'block' : 'none';
-        });
-        document.getElementById('admin-add-image-btn').addEventListener('click', () => {
-            const imageUrl = prompt("Enter URL:", "https://placehold.co/600x800");
-            if (imageUrl) addImageToAdminGrid(imageUrl);
-        });
-        document.getElementById('admin-save-btn').addEventListener('click', () => {
+        // --- EVENT HANDLERS & LOGIC ---
+        function saveAdminChanges() {
             const { category, id } = currentlyEditing;
-            const mainImage = document.getElementById('admin-product-main-image-url').value;
-            const name = document.getElementById('admin-product-name').value;
-            if (!name || !mainImage) { alert("Name and Main Image URL are required."); return; }
+            const am = document.getElementById('admin-edit-modal');
+            const mainImage = am.querySelector('#admin-product-main-image-url').value;
+            const name = am.querySelector('#admin-product-name').value;
+            if (!name || !mainImage) { alert("Product Name and Main Image URL are required."); return; }
             const newProductData = {
-                name, price: document.getElementById('admin-product-price').value, description: document.getElementById('admin-product-desc').value, mainImage,
-                otherImages: Array.from(document.querySelectorAll('#admin-images-grid img')).map(img => img.src)
+                name,
+                price: am.querySelector('#admin-product-price').value,
+                description: am.querySelector('#admin-product-desc').value,
+                mainImage,
+                otherImages: Array.from(am.querySelectorAll('#admin-images-grid img')).map(img => img.src)
             };
-            if (id === null) { const newId = category.charAt(0) + Date.now(); productsData[category][newId] = newProductData; const newCard = createProductCard(category, newId, newProductData); document.querySelector(`#${category}-section .products`).appendChild(newCard); } 
-            else { productsData[category][id] = newProductData; refreshProductCard(category, id); }
-            closeModal(adminEditModal);
-        });
-        productModal.querySelector('.size-buttons').addEventListener('click', (e) => {
-            if (e.target.classList.contains('size-btn')) {
-                productModal.querySelector('.size-btn.active')?.classList.remove('active');
-                e.target.classList.add('active');
+            if (id === null) {
+                const newId = category.charAt(0) + Date.now();
+                productsData[category][newId] = newProductData;
+            } else {
+                productsData[category][id] = newProductData;
             }
-        });
-        productModal.querySelector('.modal-add-to-cart').addEventListener('click', () => {
-            currentOrderDetails.name = productModal.querySelector('.modal-title').textContent;
-            currentOrderDetails.price = productModal.querySelector('.modal-price').textContent;
-            currentOrderDetails.size = productModal.querySelector('.size-btn.active').textContent;
-            closeModal(productModal);
-            openModal(checkoutModal);
-        });
-        document.getElementById('checkout-form').addEventListener('submit', (e) => {
+            saveData();
+            populateAllSections();
+            closeModal('admin-edit-modal');
+            alert('Changes saved successfully!');
+        }
+
+        function handleCheckout(e) {
             e.preventDefault();
-            document.getElementById('receipt-product-name').textContent = currentOrderDetails.name;
-            document.getElementById('receipt-product-price').textContent = currentOrderDetails.price;
-            document.getElementById('receipt-product-size').textContent = currentOrderDetails.size;
-            document.getElementById('receipt-customer-name').textContent = document.getElementById('customer-name').value;
-            document.getElementById('receipt-customer-phone').textContent = document.getElementById('customer-phone').value;
-            document.getElementById('receipt-customer-governorate').textContent = document.getElementById('customer-governorate').value;
-            document.getElementById('receipt-customer-address').textContent = document.getElementById('customer-address').value;
-            closeModal(checkoutModal);
+            const rm = document.getElementById('receipt-modal');
+            rm.querySelector('#receipt-product-name').textContent = currentOrderDetails.name;
+            rm.querySelector('#receipt-product-price').textContent = currentOrderDetails.price;
+            rm.querySelector('#receipt-product-size').textContent = currentOrderDetails.size;
+            rm.querySelector('#receipt-customer-name').textContent = document.getElementById('customer-name').value;
+            rm.querySelector('#receipt-customer-phone').textContent = document.getElementById('customer-phone').value;
+            rm.querySelector('#receipt-customer-governorate').textContent = document.getElementById('customer-governorate').value;
+            rm.querySelector('#receipt-customer-address').textContent = document.getElementById('customer-address').value;
+            closeModal('checkout-modal');
             e.target.reset();
-            openModal(receiptModal);
-        });
-        document.getElementById('whatsapp-icon-trigger').addEventListener('click', (e) => {
-            e.preventDefault();
-            openModal(whatsappModal);
-        });
-        document.querySelectorAll('.modal-overlay').forEach(modal => {
-            modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(modal); });
-            modal.querySelector('.modal-close-btn')?.addEventListener('click', () => closeModal(modal));
-        });
-        document.getElementById('receipt-close-btn').addEventListener('click', () => closeModal(receiptModal));
-        const menuBtn = document.getElementById('menu-btn');
-        const sidebar = document.getElementById('sidebar');
-        menuBtn.addEventListener('click', () => sidebar.classList.toggle('show-sidebar'));
-        document.addEventListener('click', (e) => {
-            if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) { sidebar.classList.remove('show-sidebar'); }
-        });
-        populateAllSections();
+            openModal('receipt-modal');
+        }
+
+        // --- INITIALIZATION ---
+        function init() {
+            loadData();
+            populateAllSections();
+            
+            // Setup all event listeners
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                modal.addEventListener('click', (e) => { if (e.target.classList.contains('modal-overlay')) closeModal(e.target.id); });
+                modal.querySelector('.modal-close-btn')?.addEventListener('click', () => closeModal(modal.id));
+            });
+            document.getElementById('main-content-area').addEventListener('click', (e) => {
+                const card = e.target.closest('.product-card');
+                if (card) {
+                    const { productId, category } = card.dataset;
+                    isAdmin ? openAdminModal(category, productId) : openUserProductModal(productsData[category][productId]);
+                }
+                const addBtn = e.target.closest('.add-item-btn');
+                if (addBtn && isAdmin) { openAdminModal(addBtn.dataset.category); }
+            });
+            document.getElementById('product-modal').querySelector('.size-buttons').addEventListener('click', (e) => {
+                if (e.target.classList.contains('size-btn')) {
+                    document.querySelector('#product-modal .size-btn.active')?.classList.remove('active');
+                    e.target.classList.add('active');
+                }
+            });
+            document.getElementById('product-modal').querySelector('.modal-add-to-cart').addEventListener('click', () => {
+                currentOrderDetails.name = document.querySelector('#product-modal .modal-title').textContent;
+                currentOrderDetails.price = document.querySelector('#product-modal .modal-price').textContent;
+                currentOrderDetails.size = document.querySelector('#product-modal .size-btn.active').textContent;
+                closeModal('product-modal');
+                openModal('checkout-modal');
+            });
+            document.getElementById('admin-edit-modal').querySelector('#admin-add-image-btn').addEventListener('click', () => {
+                const url = prompt("Enter image URL:", "https://placehold.co/600x800");
+                if (url) addImageToAdminGrid(url);
+            });
+            document.getElementById('admin-edit-modal').addEventListener('click', (e) => {
+                if (e.target.classList.contains('admin-delete-img-btn')) e.target.parentElement.remove();
+            });
+            document.getElementById('admin-edit-modal').querySelector('.admin-save-btn').addEventListener('click', saveAdminChanges);
+            document.getElementById('admin-product-main-image-url').addEventListener('input', (e) => {
+                const preview = document.getElementById('admin-main-image-preview');
+                preview.src = e.target.value;
+                preview.style.display = e.target.value ? 'block' : 'none';
+            });
+            document.getElementById('checkout-form').addEventListener('submit', handleCheckout);
+            document.getElementById('auth-trigger').addEventListener('click', () => {
+                if (isAdmin) { isAdmin = false; updateAdminUI(false); alert('Logged out.'); } 
+                else {
+                    const email = prompt("Enter admin email:");
+                    if (email && email.toLowerCase() === ADMIN_EMAIL) { isAdmin = true; updateAdminUI(true); alert('Admin mode activated!'); } 
+                    else if (email) { alert('Incorrect email.'); }
+                }
+            });
+            document.getElementById('reset-data-btn').addEventListener('click', () => {
+                if (confirm('Are you sure? This will delete all your changes and restore the defaults.')) {
+                    localStorage.removeItem(LOCAL_STORAGE_KEY);
+                    location.reload();
+                }
+            });
+            document.getElementById('whatsapp-icon-trigger').addEventListener('click', (e) => {
+                e.preventDefault();
+                openModal('whatsapp-modal');
+            });
+            const menuBtn = document.getElementById('menu-btn');
+            const sidebar = document.getElementById('sidebar');
+            menuBtn.addEventListener('click', () => sidebar.classList.toggle('show-sidebar'));
+            document.addEventListener('click', (e) => {
+                if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+                    sidebar.classList.remove('show-sidebar');
+                }
+            });
+        }
+
+        init();
     });
     </script>
 </body>
