@@ -11,7 +11,7 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
     
-    <!-- Firebase SDK Scripts (Correct version for single HTML file) -->
+    <!-- Firebase SDK Scripts -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -50,10 +50,15 @@
         .product-grid { margin-bottom: 4rem; padding-top: 60px; margin-top: -60px; }
         .product-grid h2 { font-size: 1.8rem; margin-bottom: 2rem; display: flex; align-items: center; }
         .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 2rem; }
-        .product-card { background: white; border-radius: 15px; overflow: hidden; box-shadow: var(--shadow); text-align: center; padding-bottom: 1.5rem; transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; position: relative; }
+        .product-card { background: white; border-radius: 15px; overflow: hidden; box-shadow: var(--shadow); text-align: center; padding-bottom: 1.5rem; transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; position: relative; display: flex; flex-direction: column; }
         .product-card:hover { transform: translateY(-10px); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); }
-        .product-card img { width: 100%; height: 300px; object-fit: cover; background-color: #eee; }
-        .product-card h3 { font-size: 1.1rem; margin: 1rem 0 0.5rem 0; }
+        .product-card img {
+            width: 100%;
+            aspect-ratio: 3 / 4; /* <-- MOBILE FIRST: Fixed Aspect Ratio */
+            object-fit: cover;   /* <-- Ensures image fills the space without distortion */
+            background-color: #eee;
+        }
+        .product-card h3 { font-size: 1.1rem; margin: 1rem 0.5rem 0.5rem 0.5rem; }
         .product-card .price { font-size: 1.2rem; font-weight: 700; color: var(--primary-accent); margin-bottom: 1rem; }
         .add-item-btn { margin-left: 1rem; background-color: var(--primary-accent); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 1.5rem; line-height: 30px; text-align: center; cursor: pointer; vertical-align: middle; transition: background-color 0.3s; display: none; }
         .add-item-btn:hover { background-color: #d63c6c; }
@@ -64,10 +69,10 @@
         .modal-content { background: white; padding: 2rem; border-radius: 15px; width: 90%; max-width: 800px; position: relative; max-height: 90vh; overflow-y: auto; }
         .modal-close-btn { position: absolute; top: 1rem; right: 1.5rem; font-size: 2rem; background: none; border: none; cursor: pointer; z-index: 10; }
 
-        /* Product Detail Modal (for users) */
+        /* Product Detail Modal */
         #product-modal .modal-content { display: flex; gap: 2rem; }
         .modal-gallery { flex: 1; }
-        .modal-main-image { width: 100%; height: 400px; object-fit: cover; border-radius: 10px; margin-bottom: 1rem; }
+        .modal-main-image { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 10px; margin-bottom: 1rem; background-color: #eee;}
         .modal-thumbnails { display: flex; gap: 0.5rem; flex-wrap: wrap; }
         .modal-thumb { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; cursor: pointer; border: 2px solid transparent; }
         .modal-thumb.active { border-color: var(--primary-accent); }
@@ -116,22 +121,19 @@
             body { display: block; } 
             .sidebar { transform: translateX(-100%); box-shadow: 5px 0 15px rgba(0,0,0,0.1); } 
             .sidebar.show-sidebar { transform: translateX(0); } 
-            .main-content { margin-left: 0; width: 100%; padding: 1.5rem; } 
+            .main-content { margin-left: 0; width: 100%; padding: 1rem; } 
             header { justify-content: space-between; position: sticky; top:0; background: var(--bg-color); padding: 0.5rem 0; z-index: 900;} 
             .menu-btn { display: block; } 
             
             .product-grid h2 { font-size: 1.5rem; }
             .products { grid-template-columns: 1fr 1fr; gap: 1rem; }
-            .product-card img { height: 220px; }
-            .product-card h3 { font-size: 0.9rem; }
-            .product-card .price { font-size: 1rem; }
 
             .modal-content { padding: 1.5rem; }
             #product-modal .modal-content { 
                 flex-direction: column; 
                 gap: 1.5rem;
             }
-            .modal-main-image { height: 300px; }
+            .modal-main-image { aspect-ratio: 1 / 1; }
             .modal-thumb { width: 60px; height: 60px; }
             .modal-title { font-size: 1.5rem; }
             .modal-price { font-size: 1.2rem; }
@@ -193,8 +195,8 @@
         
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const DB_REF_KEY = 'styleBloomProductsData_v3'; 
-        const LOCAL_STORAGE_KEY = 'styleBloomLocalData_v3';
+        const DB_REF_KEY = 'styleBloomProducts_v5'; 
+        const LOCAL_STORAGE_KEY = 'styleBloomLocal_v5';
         
         const ADMIN_EMAIL = "naseahmed366@gmail.com";
         let productsData = {};
@@ -202,8 +204,6 @@
         let currentOrderDetails = {};
         let currentlyEditing = { category: null, id: null };
         
-        // --- DATA SECTION ---
-        // Default data with WORKING image links from postimages.org
         const defaultProductsData = {
             anime: { 'a1': { name: 'Gojo Satoru Tee', price: 'EGP 350.00', description: 'Jujutsu Kaisen inspired.', mainImage: 'https://i.postimg.cc/9F020x79/anime-tshirt.jpg', otherImages: ['https://i.postimg.cc/8ckp2m0P/anime-tshirt2.jpg'] } },
             football: { 'f1': { name: 'Madrid 24/25 Kit', price: 'EGP 400.00', description: 'Home kit for kings.', mainImage: 'https://i.postimg.cc/1XfHfy5p/football-tshirt.jpg', otherImages: [] } },
@@ -211,19 +211,12 @@
             vangogh: { 'vg1': { name: 'Starry Night Hoodie', price: 'EGP 600.00', description: 'Van Gogh\'s masterpiece.', mainImage: 'https://i.postimg.cc/L8phtf1k/vangogh-hoodie.jpg', otherImages: [] } }
         };
 
+        // --- Data Handling Functions ---
         function loadDataFromLocal() {
-            const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-            productsData = savedData ? JSON.parse(savedData) : JSON.parse(JSON.stringify(defaultProductsData));
+            const localData = localStorage.getItem(LOCAL_STORAGE_KEY);
+            productsData = localData ? JSON.parse(localData) : JSON.parse(JSON.stringify(defaultProductsData));
         }
-
-        function saveDataToLocal() {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(productsData));
-        }
-
-        function saveDataToFirebase() {
-            db.ref(DB_REF_KEY).set(productsData).catch(e => console.error("Firebase save failed:", e));
-        }
-
+        
         function syncWithFirebase() {
             db.ref(DB_REF_KEY).once('value')
                 .then(snapshot => {
@@ -231,17 +224,28 @@
                         console.log("Data synced from Firebase.");
                         productsData = snapshot.val();
                         populateAllSections();
-                        saveDataToLocal();
+                        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(productsData));
                     } else {
-                        console.log("No data in Firebase. Saving local/default data to Firebase.");
-                        saveDataToFirebase();
+                        console.log("No data on Firebase, pushing local/default data.");
+                        db.ref(DB_REF_KEY).set(productsData);
                     }
                 })
                 .catch(error => {
                     console.error("Firebase sync failed, using local data:", error);
                 });
         }
-
+        
+        async function saveData() {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(productsData));
+            try {
+                await db.ref(DB_REF_KEY).set(productsData);
+                console.log("Data saved to Firebase successfully.");
+            } catch(e) {
+                console.error("Could not save to Firebase, but it's saved locally.", e);
+            }
+        }
+        
+        // --- UI and Modal Functions ---
         function openModal(modalId) { document.getElementById(modalId).classList.add('show-modal'); }
         function closeModal(modalId) { document.getElementById(modalId).classList.remove('show-modal'); }
 
@@ -259,13 +263,13 @@
                         card.dataset.productId = productId;
                         card.dataset.category = categoryKey;
                         const imgSrc = product.mainImage || 'https://i.postimg.cc/8C5Y22b5/placeholder.png';
-                        card.innerHTML = `<img src="${imgSrc}" alt="${product.name}"><h3>${product.name}</h3><p class="price">${product.price}</p>`;
+                        card.innerHTML = `<img src="${imgSrc}" alt="${product.name}" loading="lazy"><h3>${product.name}</h3><p class="price">${product.price}</p>`;
                         section.appendChild(card);
                     });
                 }
             });
         }
-
+        
         function updateAdminUI(isAdmin) {
             document.getElementById('auth-trigger').textContent = isAdmin ? 'Logout' : 'التسجيل';
             document.getElementById('reset-data-btn').style.display = isAdmin ? 'inline-block' : 'none';
@@ -327,20 +331,14 @@
             grid.appendChild(container);
         }
         
-        function saveAdminChanges() {
+        async function saveAdminChanges() {
             const { category, id } = currentlyEditing;
             const am = document.getElementById('admin-edit-modal');
             const mainImage = am.querySelector('#admin-product-main-image-url').value;
             const name = am.querySelector('#admin-product-name').value;
             if (!name || !mainImage) { alert("Product Name and Main Image URL are required."); return; }
             
-            const newProductData = {
-                name,
-                price: am.querySelector('#admin-product-price').value,
-                description: am.querySelector('#admin-product-desc').value,
-                mainImage,
-                otherImages: Array.from(am.querySelectorAll('#admin-images-grid img')).map(img => img.src)
-            };
+            const newProductData = { name, price: am.querySelector('#admin-product-price').value, description: am.querySelector('#admin-product-desc').value, mainImage, otherImages: Array.from(am.querySelectorAll('#admin-images-grid img')).map(img => img.src) };
             
             if (id === null) {
                 const newId = category.charAt(0) + Date.now();
@@ -351,8 +349,7 @@
             }
             
             populateAllSections(); 
-            saveDataToLocal();
-            saveDataToFirebase();
+            await saveData();
             
             closeModal('admin-edit-modal');
             alert('Changes saved successfully!');
@@ -373,11 +370,13 @@
             openModal('receipt-modal');
         }
 
-        // --- INITIALIZATION ---
+        // --- INITIALIZATION (The Robust Way) ---
         function init() {
+            // 1. Load local data and display it immediately. No waiting.
             loadDataFromLocal();
             populateAllSections();
             
+            // 2. Set up all event listeners so the UI is interactive.
             document.querySelectorAll('.modal-overlay').forEach(modal => {
                 modal.addEventListener('click', (e) => { if (e.target.classList.contains('modal-overlay')) closeModal(e.target.id); });
                 modal.querySelector('.modal-close-btn')?.addEventListener('click', () => closeModal(modal.id));
@@ -434,9 +433,9 @@
                     }
                 }
             });
-            document.getElementById('reset-data-btn').addEventListener('click', () => {
+            document.getElementById('reset-data-btn').addEventListener('click', async () => {
                 if (confirm('Are you sure? This will delete ALL data from Firebase and reset to defaults.')) {
-                    db.ref(DB_REF_KEY).remove();
+                    await db.ref(DB_REF_KEY).remove();
                     localStorage.removeItem(LOCAL_STORAGE_KEY);
                     location.reload();
                 }
@@ -452,6 +451,7 @@
             });
             document.getElementById('receipt-close-btn').addEventListener('click', () => closeModal('receipt-modal'));
 
+            // 3. Try to sync with Firebase in the background.
             syncWithFirebase();
         }
 
