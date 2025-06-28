@@ -10,6 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+    
+    <!-- Firebase SDK Scripts (Correct version for single HTML file) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
         :root {
@@ -42,7 +46,7 @@
         /* Main Content & Product Grid */
         .main-content { margin-left: 260px; flex-grow: 1; padding: 2rem 3rem; width: calc(100% - 260px); }
         header { display: flex; justify-content: flex-end; align-items: center; height: 50px; margin-bottom: 2rem; }
-        .menu-btn { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; }
+        .menu-btn { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; z-index: 1100; color: var(--primary-accent);}
         .product-grid { margin-bottom: 4rem; padding-top: 60px; margin-top: -60px; }
         .product-grid h2 { font-size: 1.8rem; margin-bottom: 2rem; display: flex; align-items: center; }
         .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 2rem; }
@@ -107,11 +111,36 @@
         #whatsapp-modal h3 i { color: #25D366; }
         #whatsapp-modal .whatsapp-number { font-size: 1.8rem; font-weight: bold; letter-spacing: 2px; color: var(--primary-accent); }
         
-        @media (max-width: 768px) { body { display: block; } .sidebar { transform: translateX(-100%); } .sidebar.show-sidebar { transform: translateX(0); } .main-content { margin-left: 0; width: 100%; padding: 1.5rem; } header { justify-content: flex-start; } .menu-btn { display: block; } .products { grid-template-columns: 1fr 1fr; gap: 1rem; } }
+        /* ====== MOBILE RESPONSIVE STYLES ====== */
+        @media (max-width: 768px) { 
+            body { display: block; } 
+            .sidebar { transform: translateX(-100%); box-shadow: 5px 0 15px rgba(0,0,0,0.1); } 
+            .sidebar.show-sidebar { transform: translateX(0); } 
+            .main-content { margin-left: 0; width: 100%; padding: 1.5rem; } 
+            header { justify-content: space-between; position: sticky; top:0; background: var(--bg-color); padding: 0.5rem 0; z-index: 900;} 
+            .menu-btn { display: block; } 
+            
+            .product-grid h2 { font-size: 1.5rem; }
+            .products { grid-template-columns: 1fr 1fr; gap: 1rem; }
+            .product-card img { height: 220px; }
+            .product-card h3 { font-size: 0.9rem; }
+            .product-card .price { font-size: 1rem; }
+
+            .modal-content { padding: 1.5rem; }
+            #product-modal .modal-content { 
+                flex-direction: column; 
+                gap: 1.5rem;
+            }
+            .modal-main-image { height: 300px; }
+            .modal-thumb { width: 60px; height: 60px; }
+            .modal-title { font-size: 1.5rem; }
+            .modal-price { font-size: 1.2rem; }
+            
+            .receipt-instruction { font-size: 1.1rem; }
+        }
     </style>
 </head>
 <body>
-
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header"><h2 class="logo">StyleBloom</h2></div>
         <nav class="sidebar-nav">
@@ -142,55 +171,75 @@
         </main>
     </div>
 
-    <!-- User Product Detail Modal -->
+    <!-- Modals (no change in HTML structure) -->
     <div class="modal-overlay" id="product-modal"><div class="modal-content"><button class="modal-close-btn">×</button><div class="modal-gallery"><img src="" alt="Main product image" class="modal-main-image"><div class="modal-thumbnails"></div></div><div class="modal-details"><h2 class="modal-title"></h2><p class="modal-price"></p><p class="modal-description"></p><div class="size-options"><h4>Size:</h4><div class="size-buttons"><button class="size-btn active">S</button><button class="size-btn">M</button><button class="size-btn">L</button><button class="size-btn">XL</button></div></div><button class="modal-add-to-cart">Add to Cart</button></div></div></div>
-    
-    <!-- Admin Edit/Create Modal -->
     <div class="modal-overlay" id="admin-edit-modal"><div class="modal-content"><button class="modal-close-btn">×</button><h2 id="admin-modal-title"></h2><div class="form-group"><label for="admin-product-name">Product Name</label><input type="text" id="admin-product-name"></div><div class="form-group"><label for="admin-product-price">Product Price</label><input type="text" id="admin-product-price"></div><div class="form-group"><label for="admin-product-desc">Product Description</label><textarea id="admin-product-desc" rows="3"></textarea></div><div class="form-group"><label for="admin-product-main-image-url">Main Image URL</label><input type="text" id="admin-product-main-image-url"><img id="admin-main-image-preview"></div><div class="form-group"><label>Additional Images</label><button id="admin-add-image-btn"><i class="fas fa-plus"></i> Add URL</button><div class="admin-images-grid" id="admin-images-grid"></div></div><button class="admin-save-btn">Save Changes</button></div></div>
-    
-    <!-- Checkout Modal -->
     <div class="modal-overlay arabic-modal" id="checkout-modal"><div class="modal-content"><button class="modal-close-btn">×</button><h2>استكمال الطلب</h2><form id="checkout-form"><div class="form-group"><label for="customer-name">الاسم بالكامل</label><input type="text" id="customer-name" required></div><div class="form-group"><label for="customer-phone">رقم الهاتف</label><input type="tel" id="customer-phone" required></div><div class="form-group"><label for="customer-governorate">المحافظة</label><input type="text" id="customer-governorate" required></div><div class="form-group"><label for="customer-address">العنوان بالتفصيل</label><textarea id="customer-address" required></textarea></div><button type="submit" class="btn-confirm">تأكيد الطلب</button></form></div></div>
-    
-    <!-- Receipt Modal -->
     <div class="modal-overlay arabic-modal" id="receipt-modal"><div class="modal-content"><button class="modal-close-btn">×</button><p class="receipt-instruction">لتأكيد طلبك يرجى اخذ لقطه شاشه لتفاصيل الطلب وارسالها علي الواتس اب علي الرقم <br><strong>01212656745</strong></p><div class="receipt-details"><div class="detail-item"><span>المنتج:</span><span id="receipt-product-name"></span></div><div class="detail-item"><span>السعر:</span><span id="receipt-product-price"></span></div><div class="detail-item"><span>المقاس:</span><span id="receipt-product-size"></span></div><hr><div class="detail-item"><span>الاسم:</span><span id="receipt-customer-name"></span></div><div class="detail-item"><span>الهاتف:</span><span id="receipt-customer-phone"></span></div><div class="detail-item"><span>المحافظة:</span><span id="receipt-customer-governorate"></span></div><div class="detail-item"><span>العنوان:</span><span id="receipt-customer-address"></span></div></div><button class="btn-confirm" id="receipt-close-btn" style="margin-top: 1.5rem;">إغلاق</button></div></div>
-    
-    <!-- WhatsApp Modal -->
     <div class="modal-overlay arabic-modal" id="whatsapp-modal"><div class="modal-content"><button class="modal-close-btn">×</button><h3><i class="fa-brands fa-whatsapp"></i> تواصل معنا عبر الواتس اب</h3><p class="whatsapp-number">01212656745</p></div></div>
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // --- DATA HANDLING & STATE ---
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA2sxov4GqtHSQ5CNyKUXmK8RYxtyz_jb4",
+            authDomain: "store-1dfc8.firebaseapp.com",
+            projectId: "store-1dfc8",
+            storageBucket: "store-1dfc8.appspot.com",
+            messagingSenderId: "1073187929180",
+            appId: "1:1073187929180:web:b910bfce490bcab62dba99",
+            databaseURL: "https://store-1dfc8-default-rtdb.firebaseio.com"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const DB_REF_KEY = 'styleBloomProductsData_v3'; 
+        const LOCAL_STORAGE_KEY = 'styleBloomLocalData_v3';
+        
         const ADMIN_EMAIL = "naseahmed366@gmail.com";
-        const LOCAL_STORAGE_KEY = 'styleBloomProductsData_v1'; // Use a versioned key
         let productsData = {};
         let isAdmin = false;
         let currentOrderDetails = {};
         let currentlyEditing = { category: null, id: null };
-
+        
+        // --- DATA SECTION ---
+        // Default data with WORKING image links from postimages.org
         const defaultProductsData = {
-            anime: { 'a1': { name: 'Gojo Satoru Tee', price: 'EGP 350.00', description: 'Jujutsu Kaisen inspired.', mainImage: 'https://placehold.co/600x800/34495e/ffffff?text=Gojo+Tee', otherImages: ['https://placehold.co/600x800/ecf0f1/2c3e50?text=White+Ver.'] } },
-            football: { 'f1': { name: 'Madrid 24/25 Kit', price: 'EGP 400.00', description: 'Home kit for kings.', mainImage: 'https://placehold.co/600x800/ffffff/000000?text=Madrid+Kit', otherImages: [] } },
-            art: { 'ar1': { name: 'The Great Wave Tee', price: 'EGP 320.00', description: 'Hokusai-inspired.', mainImage: 'https://placehold.co/600x800/2980b9/ffffff?text=Great+Wave', otherImages: [] } },
-            vangogh: { 'vg1': { name: 'Starry Night Hoodie', price: 'EGP 600.00', description: 'Van Gogh\'s masterpiece.', mainImage: 'https://placehold.co/600x800/1e3799/ffffff?text=Starry+Night', otherImages: [] } }
+            anime: { 'a1': { name: 'Gojo Satoru Tee', price: 'EGP 350.00', description: 'Jujutsu Kaisen inspired.', mainImage: 'https://i.postimg.cc/9F020x79/anime-tshirt.jpg', otherImages: ['https://i.postimg.cc/8ckp2m0P/anime-tshirt2.jpg'] } },
+            football: { 'f1': { name: 'Madrid 24/25 Kit', price: 'EGP 400.00', description: 'Home kit for kings.', mainImage: 'https://i.postimg.cc/1XfHfy5p/football-tshirt.jpg', otherImages: [] } },
+            art: { 'ar1': { name: 'The Great Wave Tee', price: 'EGP 320.00', description: 'Hokusai-inspired.', mainImage: 'https://i.postimg.cc/5yDwbD2g/art-tshirt.jpg', otherImages: [] } },
+            vangogh: { 'vg1': { name: 'Starry Night Hoodie', price: 'EGP 600.00', description: 'Van Gogh\'s masterpiece.', mainImage: 'https://i.postimg.cc/L8phtf1k/vangogh-hoodie.jpg', otherImages: [] } }
         };
 
-        // --- CORE FUNCTIONS ---
-        function saveData() {
-            try {
-                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(productsData));
-            } catch (e) {
-                console.error("Failed to save data to localStorage", e);
-            }
+        function loadDataFromLocal() {
+            const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+            productsData = savedData ? JSON.parse(savedData) : JSON.parse(JSON.stringify(defaultProductsData));
         }
 
-        function loadData() {
-            const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-            if (savedData) {
-                productsData = JSON.parse(savedData);
-            } else {
-                productsData = JSON.parse(JSON.stringify(defaultProductsData)); // Deep copy
-                saveData();
-            }
+        function saveDataToLocal() {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(productsData));
+        }
+
+        function saveDataToFirebase() {
+            db.ref(DB_REF_KEY).set(productsData).catch(e => console.error("Firebase save failed:", e));
+        }
+
+        function syncWithFirebase() {
+            db.ref(DB_REF_KEY).once('value')
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        console.log("Data synced from Firebase.");
+                        productsData = snapshot.val();
+                        populateAllSections();
+                        saveDataToLocal();
+                    } else {
+                        console.log("No data in Firebase. Saving local/default data to Firebase.");
+                        saveDataToFirebase();
+                    }
+                })
+                .catch(error => {
+                    console.error("Firebase sync failed, using local data:", error);
+                });
         }
 
         function openModal(modalId) { document.getElementById(modalId).classList.add('show-modal'); }
@@ -198,16 +247,18 @@
 
         function populateAllSections() {
             document.querySelectorAll('.products').forEach(p => p.innerHTML = '');
+            if (!productsData) return;
             Object.keys(productsData).forEach(categoryKey => {
                 const section = document.querySelector(`#${categoryKey}-section .products`);
                 if (section) {
-                    Object.keys(productsData[categoryKey]).forEach(productId => {
-                        const product = productsData[categoryKey][productId];
+                    const categoryProducts = productsData[categoryKey] || {};
+                    Object.keys(categoryProducts).forEach(productId => {
+                        const product = categoryProducts[productId];
                         const card = document.createElement('div');
                         card.className = 'product-card';
                         card.dataset.productId = productId;
                         card.dataset.category = categoryKey;
-                        const imgSrc = product.mainImage || 'https://placehold.co/600x800/ccc/ffffff?text=No+Image';
+                        const imgSrc = product.mainImage || 'https://i.postimg.cc/8C5Y22b5/placeholder.png';
                         card.innerHTML = `<img src="${imgSrc}" alt="${product.name}"><h3>${product.name}</h3><p class="price">${product.price}</p>`;
                         section.appendChild(card);
                     });
@@ -220,8 +271,7 @@
             document.getElementById('reset-data-btn').style.display = isAdmin ? 'inline-block' : 'none';
             document.querySelectorAll('.add-item-btn').forEach(btn => btn.style.display = isAdmin ? 'inline-block' : 'none');
         }
-
-        // --- MODAL DISPLAY LOGIC ---
+        
         function openUserProductModal(product) {
             const pm = document.getElementById('product-modal');
             pm.querySelector('.modal-main-image').src = product.mainImage;
@@ -230,7 +280,8 @@
             pm.querySelector('.modal-description').textContent = product.description;
             const thumbnailsContainer = pm.querySelector('.modal-thumbnails');
             thumbnailsContainer.innerHTML = '';
-            [product.mainImage, ...product.otherImages].forEach((imgSrc, index) => {
+            const allImages = [product.mainImage, ...(Array.isArray(product.otherImages) ? product.otherImages : [])];
+            allImages.forEach((imgSrc, index) => {
                 if (!imgSrc) return;
                 const thumb = document.createElement('img');
                 thumb.src = imgSrc;
@@ -262,7 +313,9 @@
             preview.style.display = product.mainImage ? 'block' : 'none';
             const grid = am.querySelector('#admin-images-grid');
             grid.innerHTML = '';
-            product.otherImages.forEach(url => addImageToAdminGrid(url));
+            if (Array.isArray(product.otherImages)) {
+                product.otherImages.forEach(url => addImageToAdminGrid(url));
+            }
             openModal('admin-edit-modal');
         }
 
@@ -270,17 +323,17 @@
             const grid = document.getElementById('admin-images-grid');
             const container = document.createElement('div');
             container.className = 'admin-img-container';
-            container.innerHTML = `<img src="${url}"><button class="admin-delete-img-btn">×</button>`;
+            container.innerHTML = `<img src="${url}" alt="preview"><button class="admin-delete-img-btn">×</button>`;
             grid.appendChild(container);
         }
-
-        // --- EVENT HANDLERS & LOGIC ---
+        
         function saveAdminChanges() {
             const { category, id } = currentlyEditing;
             const am = document.getElementById('admin-edit-modal');
             const mainImage = am.querySelector('#admin-product-main-image-url').value;
             const name = am.querySelector('#admin-product-name').value;
             if (!name || !mainImage) { alert("Product Name and Main Image URL are required."); return; }
+            
             const newProductData = {
                 name,
                 price: am.querySelector('#admin-product-price').value,
@@ -288,14 +341,19 @@
                 mainImage,
                 otherImages: Array.from(am.querySelectorAll('#admin-images-grid img')).map(img => img.src)
             };
+            
             if (id === null) {
                 const newId = category.charAt(0) + Date.now();
+                if (!productsData[category]) productsData[category] = {};
                 productsData[category][newId] = newProductData;
             } else {
                 productsData[category][id] = newProductData;
             }
-            saveData();
-            populateAllSections();
+            
+            populateAllSections(); 
+            saveDataToLocal();
+            saveDataToFirebase();
+            
             closeModal('admin-edit-modal');
             alert('Changes saved successfully!');
         }
@@ -317,10 +375,9 @@
 
         // --- INITIALIZATION ---
         function init() {
-            loadData();
+            loadDataFromLocal();
             populateAllSections();
             
-            // Setup all event listeners
             document.querySelectorAll('.modal-overlay').forEach(modal => {
                 modal.addEventListener('click', (e) => { if (e.target.classList.contains('modal-overlay')) closeModal(e.target.id); });
                 modal.querySelector('.modal-close-btn')?.addEventListener('click', () => closeModal(modal.id));
@@ -348,7 +405,7 @@
                 openModal('checkout-modal');
             });
             document.getElementById('admin-edit-modal').querySelector('#admin-add-image-btn').addEventListener('click', () => {
-                const url = prompt("Enter image URL:", "https://placehold.co/600x800");
+                const url = prompt("Paste the 'Direct Link' from Postimages here:");
                 if (url) addImageToAdminGrid(url);
             });
             document.getElementById('admin-edit-modal').addEventListener('click', (e) => {
@@ -362,23 +419,29 @@
             });
             document.getElementById('checkout-form').addEventListener('submit', handleCheckout);
             document.getElementById('auth-trigger').addEventListener('click', () => {
-                if (isAdmin) { isAdmin = false; updateAdminUI(false); alert('Logged out.'); } 
-                else {
+                if (isAdmin) {
+                    isAdmin = false;
+                    updateAdminUI(false);
+                    alert('Logged out.');
+                } else {
                     const email = prompt("Enter admin email:");
-                    if (email && email.toLowerCase() === ADMIN_EMAIL) { isAdmin = true; updateAdminUI(true); alert('Admin mode activated!'); } 
-                    else if (email) { alert('Incorrect email.'); }
+                    if (email && email.toLowerCase() === ADMIN_EMAIL) {
+                        isAdmin = true;
+                        updateAdminUI(true);
+                        alert('Admin mode activated!');
+                    } else if (email) {
+                        alert('Incorrect email.');
+                    }
                 }
             });
             document.getElementById('reset-data-btn').addEventListener('click', () => {
-                if (confirm('Are you sure? This will delete all your changes and restore the defaults.')) {
+                if (confirm('Are you sure? This will delete ALL data from Firebase and reset to defaults.')) {
+                    db.ref(DB_REF_KEY).remove();
                     localStorage.removeItem(LOCAL_STORAGE_KEY);
                     location.reload();
                 }
             });
-            document.getElementById('whatsapp-icon-trigger').addEventListener('click', (e) => {
-                e.preventDefault();
-                openModal('whatsapp-modal');
-            });
+            document.getElementById('whatsapp-icon-trigger').addEventListener('click', (e) => { e.preventDefault(); openModal('whatsapp-modal'); });
             const menuBtn = document.getElementById('menu-btn');
             const sidebar = document.getElementById('sidebar');
             menuBtn.addEventListener('click', () => sidebar.classList.toggle('show-sidebar'));
@@ -387,6 +450,9 @@
                     sidebar.classList.remove('show-sidebar');
                 }
             });
+            document.getElementById('receipt-close-btn').addEventListener('click', () => closeModal('receipt-modal'));
+
+            syncWithFirebase();
         }
 
         init();
